@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="light" name="color-scheme"/>
+<title>Adaptive-K | When Task Performance Deceives</title>
+<meta content="Adaptive-K | When Task Performance Deceives" name="title"/>
+<meta content="Adaptive-K uses distortion feedback to stabilize learnable curvature in hyperbolic GNNs while preserving geometric fidelity and task performance." name="description"/>
+<meta content="Adaptive-K, hyperbolic graph neural networks, learnable curvature, geometric fidelity, embedding distortion, curvature control, graph representation learning" name="keywords"/>
+<meta content="Lixian Chen, Jingchao Wang, Zhaorong Dai, Hanqian Liu, Danxiang Ai, Yang Shi" name="author"/>
+<meta content="index, follow" name="robots"/>
+<meta content="#0f172a" name="theme-color"/>
+<link href="static/images/favicon.png" rel="icon" type="image/png"/>
+<link href="static/images/favicon.png" rel="apple-touch-icon"/>
+<!-- Replace the relative social image with an absolute URL after deployment for the best sharing preview. -->
+<meta content="article" property="og:type"/>
+<meta content="Adaptive-K" property="og:site_name"/><meta content="https://adaptive-k-gnn.github.io/Adaptive-K-GNN/" property="og:url"/>
+<meta content="Adaptive-K: Distortion-Aware Curvature Control for Hyperbolic GNNs" property="og:title"/>
+<meta content="Task performance may saturate while geometric fidelity continues to degrade. Adaptive-K stabilizes learnable curvature through distortion-aware feedback." property="og:description"/>
+<meta content="https://adaptive-k-gnn.github.io/Adaptive-K-GNN/static/images/social_preview.png" property="og:image"/>
+<meta content="1200" property="og:image:width"/>
+<meta content="630" property="og:image:height"/>
+<meta content="Adaptive-K research project preview" property="og:image:alt"/>
+<meta content="2026-05-29T00:00:00Z" property="article:published_time"/>
+<meta content="Machine Learning" property="article:section"/>
+<meta content="Hyperbolic graph neural networks" property="article:tag"/>
+<meta content="Learnable curvature" property="article:tag"/>
+<meta content="Geometric fidelity" property="article:tag"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="Adaptive-K: Distortion-Aware Curvature Control for Hyperbolic GNNs" name="twitter:title"/>
+<meta content="When task performance saturates, geometry still matters." name="twitter:description"/>
+<meta content="https://adaptive-k-gnn.github.io/Adaptive-K-GNN/static/images/social_preview.png" name="twitter:image"/>
+<!-- Academic metadata. Replace citation_pdf_url with the deployed absolute URL when the site is online. -->
+<meta content="When task performance deceives: Task-geometry decoupling in learnable-curvature hyperbolic GNNs" name="citation_title"/>
+<meta content="Chen, Lixian" name="citation_author"/>
+<meta content="Wang, Jingchao" name="citation_author"/>
+<meta content="Dai, Zhaorong" name="citation_author"/>
+<meta content="Liu, Hanqian" name="citation_author"/>
+<meta content="Ai, Danxiang" name="citation_author"/>
+<meta content="Shi, Yang" name="citation_author"/>
+<meta content="2026/05/29" name="citation_publication_date"/>
+<meta content="Neural Networks" name="citation_journal_title"/>
+<meta content="203" name="citation_volume"/>
+<meta content="109172" name="citation_firstpage"/>
+<meta content="10.1016/j.neunet.2026.109172" name="citation_doi"/>
+<meta content="https://adaptive-k-gnn.github.io/Adaptive-K-GNN/static/pdfs/paper.pdf" name="citation_pdf_url"/>
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ScholarlyArticle",
+    "headline": "When task performance deceives: Task-geometry decoupling in learnable-curvature hyperbolic GNNs",
+    "alternateName": "Adaptive-K",
+    "description": "A distortion-aware adaptive controller that regulates learnable curvature in hyperbolic graph neural networks using embedding distortion as feedback.",
+    "author": [
+      {"@type": "Person", "name": "Lixian Chen"},
+      {"@type": "Person", "name": "Jingchao Wang"},
+      {"@type": "Person", "name": "Zhaorong Dai"},
+      {"@type": "Person", "name": "Hanqian Liu"},
+      {"@type": "Person", "name": "Danxiang Ai"},
+      {"@type": "Person", "name": "Yang Shi"}
+    ],
+    "datePublished": "2026-05-29",
+    "publisher": {"@type": "Organization", "name": "Elsevier"},
+    "isPartOf": {"@type": "Periodical", "name": "Neural Networks"},
+    "identifier": "https://doi.org/10.1016/j.neunet.2026.109172",
+    "url": "https://adaptive-k-gnn.github.io/Adaptive-K-GNN/",
+    "image": "https://adaptive-k-gnn.github.io/Adaptive-K-GNN/static/images/social_preview.png",
+    "keywords": [
+      "Hyperbolic representation learning",
+      "Learnable curvature",
+      "Geometric fidelity",
+      "Bias-complexity trade-off",
+      "Model stability in geometric deep learning"
+    ]
+  }
+  </script>
+<style>
+    :root {
+      --ink: #0f172a;
+      --text: #1e293b;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --blue: #2563eb;
+      --cyan: #0891b2;
+      --pink: #db2777;
+      --green: #15803d;
+      --shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --max-width: 1120px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--surface);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.72;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { max-width: 100%; display: block; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { color: #1d4ed8; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    .container {
+      width: min(var(--max-width), calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+    }
+
+    .nav-inner {
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .nav-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background: linear-gradient(135deg, var(--blue), var(--cyan) 55%, var(--pink));
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      font-size: 0.92rem;
+      font-weight: 650;
+    }
+
+    .nav-links a { color: #475569; }
+    .nav-links a:hover { color: var(--ink); }
+
+    .nav-toggle {
+      display: none;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 92px 0 68px;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(37, 99, 235, 0.13), transparent 28%),
+        radial-gradient(circle at 88% 8%, rgba(219, 39, 119, 0.09), transparent 24%),
+        linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -210px auto;
+      width: 520px;
+      height: 520px;
+      border: 1px solid rgba(8, 145, 178, 0.14);
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 56px rgba(8, 145, 178, 0.035),
+        0 0 0 112px rgba(37, 99, 235, 0.025);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .venue-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 13px;
+      border: 1px solid #dbeafe;
+      border-radius: 999px;
+      color: #1d4ed8;
+      background: rgba(239, 246, 255, 0.9);
+      font-size: 0.86rem;
+      font-weight: 750;
+      letter-spacing: 0.015em;
+    }
+
+    .project-name {
+      margin: 24px 0 8px;
+      font-size: clamp(3.6rem, 9vw, 6.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.075em;
+      font-weight: 900;
+      color: var(--ink);
+    }
+
+    .project-name span {
+      background: linear-gradient(115deg, var(--blue), var(--cyan) 48%, var(--pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .paper-title {
+      max-width: 980px;
+      margin: 24px auto 0;
+      color: var(--ink);
+      font-size: clamp(1.65rem, 3.2vw, 2.65rem);
+      line-height: 1.18;
+      letter-spacing: -0.04em;
+      font-weight: 800;
+    }
+
+    .tagline {
+      max-width: 760px;
+      margin: 22px auto 0;
+      color: var(--muted);
+      font-size: clamp(1.05rem, 2vw, 1.28rem);
+      line-height: 1.55;
+    }
+
+    .authors {
+      max-width: 900px;
+      margin: 30px auto 0;
+      color: #334155;
+      font-size: 1.02rem;
+      line-height: 1.9;
+    }
+
+    .authors strong { color: var(--ink); font-weight: 720; }
+    .authors sup { color: var(--blue); font-size: 0.68em; }
+
+    .affiliations {
+      max-width: 950px;
+      margin: 12px auto 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.7;
+    }
+
+    .author-note {
+      margin-top: 8px;
+      color: #64748b;
+      font-size: 0.8rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .button {
+      min-height: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 10px 18px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-weight: 760;
+      line-height: 1;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .button:hover { transform: translateY(-1px); }
+    .button-primary {
+      color: white;
+      background: var(--ink);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+    }
+    .button-primary:hover { color: white; background: #020617; }
+    .button-secondary {
+      color: var(--ink);
+      border-color: #cbd5e1;
+      background: rgba(255,255,255,0.88);
+    }
+    .button-secondary:hover { color: var(--ink); border-color: #94a3b8; }
+    .button-disabled {
+      color: #94a3b8;
+      border-color: #e2e8f0;
+      background: #f8fafc;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .button-icon {
+      width: 20px;
+      height: 20px;
+      display: inline-grid;
+      place-items: center;
+      font-size: 0.94rem;
+    }
+
+    .teaser-wrap { padding: 48px 0 76px; background: var(--surface-soft); }
+    .figure-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: white;
+      box-shadow: var(--shadow);
+    }
+    .figure-card img { width: 100%; height: auto; }
+    .figure-caption {
+      margin: 0;
+      padding: 18px 24px 22px;
+      color: #475569;
+      border-top: 1px solid var(--line);
+      font-size: 0.94rem;
+      line-height: 1.6;
+      text-align: center;
+    }
+    .figure-caption strong { color: var(--ink); }
+
+    .section { padding: 88px 0; }
+    .section-soft { background: var(--surface-soft); }
+    .section-dark {
+      color: #e2e8f0;
+      background:
+        radial-gradient(circle at 10% 0, rgba(37, 99, 235, 0.23), transparent 28%),
+        radial-gradient(circle at 90% 0, rgba(219, 39, 119, 0.15), transparent 26%),
+        #0f172a;
+    }
+
+    .section-heading {
+      max-width: 820px;
+      margin: 0 auto 45px;
+      text-align: center;
+    }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--blue);
+      font-size: 0.78rem;
+      font-weight: 850;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+    .section-dark .eyebrow { color: #7dd3fc; }
+    .section-title {
+      margin: 0;
+      color: var(--ink);
+      font-size: clamp(2rem, 4vw, 3.15rem);
+      line-height: 1.12;
+      letter-spacing: -0.045em;
+      font-weight: 850;
+    }
+    .section-dark .section-title { color: white; }
+    .section-lead {
+      margin: 18px auto 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.7;
+    }
+    .section-dark .section-lead { color: #cbd5e1; }
+
+    .abstract {
+      max-width: 900px;
+      margin: 0 auto;
+      color: #334155;
+      font-size: 1.03rem;
+      text-align: justify;
+    }
+    .abstract p { margin: 0 0 1.2em; }
+    .abstract p:last-child { margin-bottom: 0; }
+
+    .grid-3, .grid-4, .grid-2 {
+      display: grid;
+      gap: 22px;
+    }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .card {
+      position: relative;
+      height: 100%;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: white;
+      box-shadow: 0 12px 35px rgba(15, 23, 42, 0.055);
+    }
+    .card-number {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      border-radius: 12px;
+      color: white;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      font-weight: 850;
+      font-size: 0.9rem;
+    }
+    .card h3 {
+      margin: 0 0 9px;
+      color: var(--ink);
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+    .card p { margin: 0; color: var(--muted); font-size: 0.94rem; }
+
+    .problem-summary {
+      max-width: 920px;
+      margin: 28px auto 0;
+      padding: 22px 26px;
+      border-left: 4px solid var(--pink);
+      border-radius: 0 14px 14px 0;
+      color: #334155;
+      background: #fff1f2;
+    }
+    .problem-summary strong { color: #9f1239; }
+
+    .method-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.75fr);
+      gap: 30px;
+      align-items: start;
+    }
+    .method-points { display: grid; gap: 16px; }
+    .method-point {
+      padding: 21px 22px;
+      border: 1px solid #dbeafe;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.88);
+    }
+    .method-point h3 {
+      margin: 0 0 7px;
+      color: var(--ink);
+      font-size: 1.02rem;
+    }
+    .method-point p { margin: 0; color: var(--muted); font-size: 0.91rem; }
+    .method-point:nth-child(2) { border-color: #fbcfe8; }
+    .method-point:nth-child(3) { border-color: #bbf7d0; }
+
+    .formula-panel {
+      padding: 34px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.065);
+      box-shadow: inset 0 1px rgba(255, 255, 255, 0.05);
+    }
+    .formula {
+      margin: 0 0 15px;
+      color: white;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.55rem, 3vw, 2.45rem);
+      line-height: 1.25;
+      text-align: center;
+    }
+    .formula-note {
+      margin: 0;
+      color: #cbd5e1;
+      text-align: center;
+      font-size: 0.96rem;
+    }
+    .tradeoff-cards { margin-top: 22px; }
+    .tradeoff-card {
+      padding: 22px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+    }
+    .tradeoff-card h3 { margin: 0 0 8px; color: white; font-size: 1rem; }
+    .tradeoff-card p { margin: 0; color: #cbd5e1; font-size: 0.9rem; }
+
+    .theory-figure { margin-top: 35px; background: white; }
+
+    .metrics { margin-bottom: 36px; }
+    .metric-card {
+      height: 100%;
+      padding: 25px 20px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+      text-align: center;
+      box-shadow: 0 12px 35px rgba(15, 23, 42, 0.055);
+    }
+    .metric-context {
+      display: block;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .metric-value {
+      display: block;
+      margin: 8px 0 5px;
+      color: var(--blue);
+      font-size: clamp(2rem, 4vw, 2.85rem);
+      line-height: 1;
+      letter-spacing: -0.045em;
+      font-weight: 900;
+    }
+    .metric-label { display: block; color: var(--ink); font-size: 0.94rem; font-weight: 760; }
+    .metric-detail { display: block; margin-top: 5px; color: var(--muted); font-size: 0.82rem; }
+
+    .results-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+      gap: 30px;
+      align-items: stretch;
+    }
+    .result-notes {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+    }
+    .result-note {
+      padding: 21px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: white;
+    }
+    .result-note h3 { margin: 0 0 7px; color: var(--ink); font-size: 1rem; }
+    .result-note p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 38px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+    }
+    table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th, td { padding: 14px 16px; border-bottom: 1px solid var(--line); text-align: left; }
+    th {
+      color: #475569;
+      background: #f8fafc;
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    tr:last-child td { border-bottom: 0; }
+    .method-ours { color: var(--blue); font-weight: 800; }
+    .better { color: var(--green); font-weight: 750; }
+
+    .citation-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 310px;
+      gap: 28px;
+      align-items: stretch;
+    }
+    .bibtex-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #0b1120;
+      box-shadow: var(--shadow);
+    }
+    .bibtex-header {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      color: white;
+    }
+    .bibtex-header strong { font-size: 0.95rem; }
+    .copy-button {
+      padding: 7px 12px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 999px;
+      color: #e2e8f0;
+      background: rgba(255,255,255,0.06);
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 750;
+      cursor: pointer;
+    }
+    .copy-button:hover { background: rgba(255,255,255,0.11); }
+    pre {
+      margin: 0;
+      padding: 24px;
+      overflow-x: auto;
+      color: #dbeafe;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.82rem;
+      line-height: 1.65;
+      white-space: pre;
+    }
+    .citation-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+    }
+    .citation-side h3 { margin: 0 0 10px; color: var(--ink); }
+    .citation-side p { margin: 0 0 18px; color: var(--muted); font-size: 0.92rem; }
+    .citation-side .button { width: 100%; margin-top: 8px; }
+
+    footer {
+      padding: 34px 0;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      background: #f8fafc;
+      font-size: 0.84rem;
+      text-align: center;
+    }
+    footer p { max-width: 900px; margin: 0 auto; }
+
+    .scroll-top {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 40;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      color: white;
+      background: var(--ink);
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.25);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(8px);
+      transition: 180ms ease;
+      cursor: pointer;
+    }
+    .scroll-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+
+    @media (max-width: 960px) {
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-3 { grid-template-columns: 1fr; }
+      .method-layout, .results-layout, .citation-grid { grid-template-columns: 1fr; }
+      .citation-side { text-align: center; }
+    }
+
+    @media (max-width: 760px) {
+      .nav-toggle { display: inline-block; }
+      .nav-inner { position: relative; }
+      .nav-links {
+        position: absolute;
+        top: 58px;
+        left: 0;
+        right: 0;
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: white;
+        box-shadow: var(--shadow);
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a { padding: 10px 12px; border-radius: 10px; }
+      .nav-links a:hover { background: #f8fafc; }
+      .hero { padding-top: 70px; }
+      .section { padding: 70px 0; }
+      .grid-4, .grid-2 { grid-template-columns: 1fr; }
+      .project-name { letter-spacing: -0.06em; }
+      .paper-title { font-size: 1.7rem; }
+      .authors { font-size: 0.94rem; }
+      .affiliations { font-size: 0.78rem; }
+      .abstract { text-align: left; }
+      .card { padding: 23px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    }
+  
+
+    .results-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin: 32px 0 38px;
+    }
+    .results-summary-grid .result-note { height: 100%; }
+    @media (max-width: 820px) {
+      .results-summary-grid { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+<nav aria-label="Primary navigation" class="site-nav">
+<div class="container nav-inner">
+<a aria-label="Adaptive-K home" class="nav-brand" href="#top">
+<span class="brand-mark">K</span>
+<span>Adaptive-K</span>
+</a>
+<button aria-controls="navLinks" aria-expanded="false" class="nav-toggle" id="navToggle" type="button">Menu</button>
+<div class="nav-links" id="navLinks">
+<a href="#abstract">Abstract</a>
+<a href="#problem">Problem</a>
+<a href="#method">Method</a>
+
+<a href="#results">Results</a>
+<a href="#citation">Citation</a>
+</div>
+</div>
+</nav>
+<main id="top">
+<header class="hero">
+<div class="container hero-content">
+<div class="venue-pill">Neural Networks · 2026</div>
+<h1 class="project-name"><span>Adaptive-K</span></h1>
+<h2 class="paper-title">When Task Performance Deceives: Task-Geometry Decoupling in Learnable-Curvature Hyperbolic GNNs</h2>
+<p class="tagline">When task performance saturates, geometry still matters. Adaptive-K uses distortion as feedback to stabilize learnable curvature without materially compromising predictive performance.</p>
+<div aria-label="Authors" class="authors">
+<strong>Lixian Chen</strong><sup>1,*</sup>,
+          <strong>Jingchao Wang</strong><sup>2,*</sup>,
+          <strong>Zhaorong Dai</strong><sup>3</sup>,
+          <strong>Hanqian Liu</strong><sup>4</sup>,
+          <strong>Danxiang Ai</strong><sup>1,†</sup>,
+          <strong>Yang Shi</strong><sup>5</sup>
+</div>
+<div class="affiliations">
+<sup>1</sup> School of Management, Guangdong University of Technology ·
+          <sup>2</sup> School of Computer Science, Peking University ·
+          <sup>3</sup> College of Economics and Management, South China Agricultural University ·
+          <sup>4</sup> School of Mathematics (Zhuhai), Sun Yat-Sen University ·
+          <sup>5</sup> School of Computer Science and Technology, Guangdong University of Technology
+        </div>
+<div class="author-note"><sup>*</sup> Equal contribution   ·   <sup>†</sup> Corresponding author</div>
+<div aria-label="Paper resources" class="hero-actions">
+<a class="button button-primary" href="static/pdfs/paper.pdf" rel="noopener" target="_blank">
+<span aria-hidden="true" class="button-icon">▤</span><span>Paper</span>
+</a>
+<a class="button button-secondary" href="https://doi.org/10.1016/j.neunet.2026.109172" rel="noopener" target="_blank">
+<span class="button-icon">↗</span><span>DOI</span>
+</a>
+<a class="button button-secondary" href="https://github.com/Adaptive-K-GNN/Adaptive-K-GNN" rel="noopener" target="_blank">
+<span class="button-icon">&lt;/&gt;</span><span>Code</span>
+</a>
+</div>
+</div>
+</header>
+<section aria-labelledby="teaser-title" class="teaser-wrap">
+<div class="container">
+<figure class="figure-card">
+<a href="static/images/task_geometry_decoupling.png" rel="noopener" target="_blank">
+<img alt="Validation ROC AUC saturates while geometric distortion continues to increase on PubMed" src="static/images/task_geometry_decoupling.png"/>
+</a>
+<figcaption class="figure-caption" id="teaser-title">
+<strong>Task performance can be deceptive.</strong> On PubMed, validation ROC AUC saturates around epoch 400, while geometric distortion continues to grow during unconstrained curvature learning.
+          </figcaption>
+</figure>
+</div>
+</section>
+<section class="section" id="abstract">
+<div class="container">
+<div class="section-heading">
+<p class="eyebrow">Paper overview</p>
+<h2 class="section-title">Abstract</h2>
+</div>
+<div class="abstract">
+<p>Treating curvature as a learnable parameter in Hyperbolic Graph Neural Networks (GNNs) has become a useful approach for modeling complex graphs. However, in the standard single-global-curvature setting, improved task performance does not necessarily guarantee geometric fidelity. Our empirical analysis reveals a decoupling between these objectives: without explicit geometric control, the embedding geometry may degrade substantially even after validation performance has largely saturated.</p>
+<p>To address this issue, we formulate curvature learning as a distortion-feedback control problem and propose a Distortion-Aware Adaptive Controller. Guided by a curvature-dependent trade-off between geometric fidelity and statistical complexity, the method uses embedding distortion as a feedback signal to regulate curvature during training, improving the stability and reliability of curvature learning while retaining competitive task performance.</p>
+<p>Across the evaluated link prediction benchmarks, the proposed controller mitigates late-stage geometric degradation and substantially reduces curvature variance, highlighting the value of explicit geometry-aware feedback in learnable-curvature hyperbolic GNNs.</p>
+</div>
+</div>
+</section>
+<section class="section section-soft" id="problem">
+<div class="container">
+<div class="section-heading">
+<p class="eyebrow">Core observation</p>
+<h2 class="section-title">The Task-Geometry Decoupling Problem</h2>
+<p class="section-lead">Validation metrics can plateau while the geometry continues to drift. A task-only training signal therefore provides an incomplete view of a learnable-curvature model's state.</p>
+</div>
+<div class="grid-3">
+<article class="card">
+<div class="card-number">01</div>
+<h3>Task Saturation</h3>
+<p>The validation objective reaches a plateau, so further training yields only negligible task gains.</p>
+</article>
+<article class="card">
+<div class="card-number">02</div>
+<h3>Geometric Drift</h3>
+<p>Curvature and embedding distortion continue to move after the task metric has stabilized.</p>
+</article>
+<article class="card">
+<div class="card-number">03</div>
+<h3>Hidden Degradation</h3>
+<p>Strong predictive performance can conceal a less faithful representation of the graph's intrinsic structure.</p>
+</article>
+</div>
+<div class="problem-summary">
+<strong>Central implication:</strong> early stopping or checkpoint selection based only on validation performance may preserve accuracy while overlooking late-stage geometric degradation.
+        </div>
+</div>
+</section>
+<section class="section" id="method">
+<div class="container">
+<div class="section-heading">
+<p class="eyebrow">Proposed method</p>
+<h2 class="section-title">Distortion-Aware Adaptive-K Controller</h2>
+<p class="section-lead">Adaptive-K adds a geometry control path to the standard task optimization path. Distortion is monitored online and used to regulate the global learnable curvature.</p>
+</div>
+<div class="method-layout">
+<figure class="figure-card">
+<a href="static/images/adaptive_k_framework.png" rel="noopener" target="_blank">
+<img alt="Architecture of the distortion-aware adaptive curvature controller" loading="lazy" src="static/images/adaptive_k_framework.png"/>
+</a>
+<figcaption class="figure-caption">The controller combines task learning with a geometry-aware feedback loop, band-confinement penalty, and curvature-freezing mechanism.</figcaption>
+</figure>
+<div class="method-points">
+<article class="method-point">
+<h3>1. Distortion Feedback</h3>
+<p>Embedding stress is periodically measured on a fixed sampled pair set and treated as a direct geometric control signal.</p>
+</article>
+<article class="method-point">
+<h3>2. Band Confinement</h3>
+<p>A two-sided quadratic penalty applies a restoring force only when the curvature leaves a calibrated stable band.</p>
+</article>
+<article class="method-point">
+<h3>3. Curvature Freezing</h3>
+<p>Once curvature and distortion satisfy the target stability conditions, curvature updates are frozen to suppress further drift.</p>
+</article>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section section-soft" id="results">
+<div class="container">
+<div class="section-heading">
+<p class="eyebrow">Empirical findings</p>
+<h2 class="section-title">Stability Without Material Task Loss</h2>
+<p class="section-lead">Adaptive-K substantially improves geometric stability in the evaluated single-global-curvature HGCN setting while retaining competitive task performance.</p>
+</div>
+<div class="grid-4 metrics">
+<article class="metric-card">
+<span class="metric-context">PubMed</span>
+<span class="metric-value">89.2%</span>
+<span class="metric-label">Distortion reduction</span>
+<span class="metric-detail">2.4228 → 0.2617 vs. Free-K</span>
+</article>
+<article class="metric-card">
+<span class="metric-context">PubMed</span>
+<span class="metric-value">83.0%</span>
+<span class="metric-label">Curvature variability reduction</span>
+<span class="metric-detail">0.0712 → 0.0121</span>
+</article>
+<article class="metric-card">
+<span class="metric-context">Airport</span>
+<span class="metric-value">93.66</span>
+<span class="metric-label">Test ROC AUC (%)</span>
+<span class="metric-detail">Highest among compared methods</span>
+</article>
+<article class="metric-card">
+<span class="metric-context">Disease</span>
+<span class="metric-value">88.72</span>
+<span class="metric-label">Test ROC AUC (%)</span>
+<span class="metric-detail">Highest among compared methods</span>
+</article>
+</div>
+<div class="results-summary-grid">
+<article class="result-note">
+<h3>Predictive performance is retained</h3>
+<p>Across the reported benchmarks, Adaptive-K remains competitive with Fixed-K and unconstrained Free-K on ROC AUC and AP.</p>
+</article>
+<article class="result-note">
+<h3>Geometry becomes more reliable</h3>
+<p>Adaptive-K records the lowest distortion on PubMed and Airport and consistently reduces curvature variability relative to Free-K.</p>
+</article>
+<article class="result-note">
+<h3>Scope of the claim</h3>
+<p>The study focuses on the standard single-global-curvature HGCN setting; heterogeneous or local-curvature architectures are outside its scope.</p>
+</article>
+</div>
+<div aria-label="Selected link prediction results" class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Dataset</th>
+<th>Method</th>
+<th>ROC AUC (%) ↑</th>
+<th>AP (%) ↑</th>
+<th>Distortion ↓</th>
+<th>Curvature Std. ↓</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td rowspan="2">PubMed</td>
+<td>Free-K</td>
+<td>95.75 ± 0.08</td>
+<td>95.67 ± 0.07</td>
+<td>2.4228 ± 0.0478</td>
+<td>0.0712</td>
+</tr>
+<tr>
+<td class="method-ours">Adaptive-K</td>
+<td>95.55 ± 0.07</td>
+<td>95.51 ± 0.09</td>
+<td class="better">0.2617 ± 0.0286</td>
+<td class="better">0.0121</td>
+</tr>
+<tr>
+<td rowspan="2">Airport</td>
+<td>Free-K</td>
+<td>93.49 ± 0.38</td>
+<td>94.19 ± 0.23</td>
+<td>0.3804 ± 0.0670</td>
+<td>0.3294</td>
+</tr>
+<tr>
+<td class="method-ours">Adaptive-K</td>
+<td class="better">93.66 ± 0.38</td>
+<td>94.15 ± 0.26</td>
+<td class="better">0.2121 ± 0.0219</td>
+<td class="better">0.0163</td>
+</tr>
+<tr>
+<td rowspan="2">Disease</td>
+<td>Free-K</td>
+<td>88.13 ± 0.47</td>
+<td>84.47 ± 0.27</td>
+<td>1.3100 ± 0.4088</td>
+<td>0.0253</td>
+</tr>
+<tr>
+<td class="method-ours">Adaptive-K</td>
+<td class="better">88.72 ± 0.33</td>
+<td>84.67 ± 0.27</td>
+<td class="better">0.7194 ± 0.0818</td>
+<td class="better">0.0229</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section class="section" id="citation">
+<div class="container">
+<div class="section-heading">
+<p class="eyebrow">Reference</p>
+<h2 class="section-title">Citation</h2>
+<p class="section-lead">Please cite the journal article below when using the method, figures, or findings.</p>
+</div>
+<div class="citation-grid">
+<div class="bibtex-card">
+<div class="bibtex-header">
+<strong>BibTeX</strong>
+<button class="copy-button" id="copyBibtex" type="button">Copy</button>
+</div>
+<pre id="bibtex">@article{chen2026task,
+  title     = {When task performance deceives: Task-geometry decoupling in learnable-curvature hyperbolic GNNs},
+  author    = {Chen, Lixian and Wang, Jingchao and Dai, Zhaorong and Liu, Hanqian and Ai, Danxiang and Shi, Yang},
+  journal   = {Neural Networks},
+  volume    = {203},
+  pages     = {109172},
+  year      = {2026},
+  publisher = {Elsevier},
+  doi       = {10.1016/j.neunet.2026.109172}
+}</pre>
+</div>
+<aside class="citation-side">
+<h3>Neural Networks 203 (2026)</h3>
+<p>Article 109172 · Published online 29 May 2026.</p>
+<a class="button button-primary" href="static/pdfs/paper.pdf" rel="noopener" target="_blank">Open Paper PDF</a>
+<a class="button button-secondary" href="https://doi.org/10.1016/j.neunet.2026.109172" rel="noopener" target="_blank">View DOI Record</a>
+</aside>
+</div>
+</div>
+</section>
+</main>
+<footer>
+<div class="container">
+<p>This project page presents the article <em>When Task Performance Deceives</em>. Paper text and figures remain subject to the copyright terms of the original Neural Networks publication. Source code and project materials are available through the linked GitHub repository.</p>
+</div>
+</footer>
+<button aria-label="Scroll to top" class="scroll-top" id="scrollTop" title="Scroll to top" type="button">↑</button>
+<script>
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    navToggle.addEventListener('click', () => {
+      const open = navLinks.classList.toggle('open');
+      navToggle.setAttribute('aria-expanded', String(open));
+    });
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    const scrollTopButton = document.getElementById('scrollTop');
+    window.addEventListener('scroll', () => {
+      scrollTopButton.classList.toggle('visible', window.scrollY > 600);
+    }, { passive: true });
+    scrollTopButton.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    const copyButton = document.getElementById('copyBibtex');
+    copyButton.addEventListener('click', async () => {
+      const text = document.getElementById('bibtex').textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        copyButton.textContent = 'Copied';
+      } catch (error) {
+        const range = document.createRange();
+        range.selectNodeContents(document.getElementById('bibtex'));
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        copyButton.textContent = 'Selected';
+      }
+      window.setTimeout(() => { copyButton.textContent = 'Copy'; }, 1800);
+    });
+  </script>
+</body>
+</html>
